@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Benim Bedenim, Benim Kararım 🛡️</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Google Fonts (Türkçe karakter destekli, çocuk dostu yuvarlak font: Nunito) -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#dcfce7 2px, transparent 2px);
+            background-size: 30px 30px;
+            user-select: none;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+            width: 100%;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bounce-hover:hover {
+            transform: scale(1.05) translateY(-5px);
+            transition: all 0.2s;
+        }
+
+        .avatar-option {
+            cursor: pointer;
+            border: 4px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .avatar-option.selected {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+            transform: scale(1.1);
+        }
+
+        .gender-option.selected {
+            border-color: #ec4899;
+            transform: scale(1.05);
+        }
+        .gender-option.selected.erkek {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .gender-option.selected.kiz {
+            border-color: #ec4899;
+            background-color: #fdf2f8;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        /* Sürükle Bırak Stilleri */
+        .draggable {
+            touch-action: none;
+            cursor: grab;
+            z-index: 50;
+            position: relative;
+        }
+        
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        .dropzone {
+            border: 4px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        
+        .dropzone.highlight {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: scale(1.02);
+        }
+
+        /* Güvenlik balonu efekti */
+        .safety-bubble {
+            box-shadow: 0 0 20px 10px rgba(134, 239, 172, 0.5);
+            border-radius: 50%;
+            transition: all 0.5s;
+        }
+        .safety-bubble.active {
+            box-shadow: 0 0 40px 20px rgba(52, 211, 153, 0.8);
+            border: 4px solid #34d399;
+        }
+
+        .swal2-popup {
+            font-family: 'Nunito', sans-serif !important;
+            border-radius: 1.5rem !important;
+        }
+        .swal2-title { font-size: 1.8rem !important; }
+        .swal2-html-container { font-size: 1.3rem !important; }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-4 text-gray-800">
+
+    <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-4 sm:p-6 md:p-10 lg:p-12 border-4 border-blue-100 relative overflow-hidden flex flex-col items-center justify-center min-h-[85vh]">
+        
+        <!-- Üst Bilgi Barı -->
+        <div id="top-bar" class="hidden w-full flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b-2 border-dashed border-gray-200 gap-4">
+            <div class="flex items-center gap-3 md:gap-4">
+                <div id="player-avatar-display" class="text-4xl lg:text-5xl bg-blue-50 p-2 md:p-3 rounded-full">👦</div>
+                <div>
+                    <p class="text-sm md:text-base lg:text-lg text-gray-500">Kahraman:</p>
+                    <p id="player-name-display" class="font-bold text-xl md:text-2xl lg:text-3xl text-blue-600">Kahraman</p>
+                </div>
+            </div>
+            <div class="bg-green-100 text-green-700 px-4 py-2 lg:px-6 lg:py-3 rounded-full font-bold flex items-center gap-2 text-sm md:text-base lg:text-xl shadow-sm">
+                🛡️ Güvenlik Balonum
+            </div>
+        </div>
+
+        <!-- ================= EKRAN 0: GİRİŞ ================= -->
+        <div id="screen-intro" class="screen active flex-col items-center text-center gap-4 lg:gap-8">
+            <div class="text-6xl lg:text-8xl mb-2 animate-bounce">🛡️</div>
+            <h1 class="text-4xl md:text-5xl lg:text-7xl font-bold text-blue-600 mb-2 leading-tight">Benim Bedenim,<br>Benim Kararım!</h1>
+            <p class="text-lg md:text-xl lg:text-3xl text-gray-600 mb-4 lg:mb-8 max-w-3xl">Özel güçlerini keşfetmeye hazır mısın? Kendi güvenlik balonunu oluşturma zamanı!</p>
+            
+            <div class="w-full max-w-md lg:max-w-2xl bg-blue-50 p-6 lg:p-10 rounded-2xl lg:rounded-3xl shadow-sm">
+                <label class="block text-lg lg:text-2xl font-bold text-gray-700 mb-4 lg:mb-6">Sen bir kız mısın, erkek misin?</label>
+                <div class="flex justify-center gap-4 lg:gap-8 mb-6 lg:mb-10">
+                    <div class="gender-option flex-1 p-4 lg:p-6 rounded-2xl bg-white shadow-md border-4 border-transparent cursor-pointer transition-all flex flex-col items-center" onclick="selectGender(this, 'kiz')">
+                        <div class="text-5xl lg:text-7xl mb-2">👧</div>
+                        <div class="font-bold text-xl lg:text-2xl text-pink-500">Kızım</div>
+                    </div>
+                    <div class="gender-option flex-1 p-4 lg:p-6 rounded-2xl bg-white shadow-md border-4 border-transparent cursor-pointer transition-all flex flex-col items-center" onclick="selectGender(this, 'erkek')">
+                        <div class="text-5xl lg:text-7xl mb-2">👦</div>
+                        <div class="font-bold text-xl lg:text-2xl text-blue-500">Erkeğim</div>
+                    </div>
+                </div>
+
+                <label class="block text-lg lg:text-2xl font-bold text-gray-700 mb-4 lg:mb-6">Seni en iyi anlatan avatarı seç:</label>
+                <div class="flex flex-wrap justify-center gap-4 lg:gap-8 mb-6 lg:mb-10">
+                    <div class="avatar-option text-5xl lg:text-7xl p-4 lg:p-6 rounded-2xl bg-white shadow-md selected" onclick="selectAvatar(this, '🐶')">🐶</div>
+                    <div class="avatar-option text-5xl lg:text-7xl p-4 lg:p-6 rounded-2xl bg-white shadow-md" onclick="selectAvatar(this, '🐱')">🐱</div>
+                    <div class="avatar-option text-5xl lg:text-7xl p-4 lg:p-6 rounded-2xl bg-white shadow-md" onclick="selectAvatar(this, '👦')">👦</div>
+                    <div class="avatar-option text-5xl lg:text-7xl p-4 lg:p-6 rounded-2xl bg-white shadow-md" onclick="selectAvatar(this, '👧')">👧</div>
+                </div>
+
+                <button onclick="startGame()" class="btn-primary w-full py-4 lg:py-6 rounded-2xl lg:rounded-3xl text-2xl lg:text-4xl font-bold transition-all hover:bg-blue-600">
+                    Oyuna Başla 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= EKRAN 1: MAYO KURALI ================= -->
+        <div id="screen-stage1" class="screen flex-col items-center text-center gap-4 lg:gap-8">
+            <div class="bg-yellow-100 text-yellow-800 px-4 py-1 lg:px-6 lg:py-2 rounded-full text-sm lg:text-lg font-bold tracking-wide uppercase">Bölüm 1 / 4</div>
+            <h2 id="stage1-title" class="text-3xl md:text-4xl lg:text-5xl font-bold text-purple-600">Mayo Kuralı 🩱</h2>
+            
+            <div id="stage1-story" class="bg-white px-6 py-3 rounded-2xl shadow-sm border-2 border-purple-200 text-purple-700 font-bold text-lg md:text-xl lg:text-2xl transform -rotate-1 my-2 max-w-3xl">
+                Hikaye buraya gelecek...
+            </div>
+            
+            <p id="stage1-desc" class="text-lg md:text-xl lg:text-2xl text-gray-700 max-w-2xl lg:max-w-4xl">Bedeninde sadece sana ait olan "Özel Bölgeler" vardır. <b>Aşağıdaki mayoyu tutup karakterinin üzerine sürükle!</b></p>
+            
+            <div class="flex flex-col md:flex-row items-center gap-10 md:gap-20 my-4 lg:my-8 bg-purple-50 p-6 lg:p-12 rounded-3xl w-full justify-center shadow-inner relative">
+                
+                <!-- Sürüklenen Öğe -->
+                <div class="flex flex-col items-center gap-2 z-50">
+                    <div id="swimsuit-draggable" class="draggable bg-white rounded-2xl shadow-lg p-4 pulse-animation flex items-center justify-center w-32 h-32 lg:w-40 lg:h-40 border-4 border-purple-300">
+                        <span id="swimsuit-icon-drag" class="text-7xl lg:text-8xl">🩱</span>
+                    </div>
+                    <span id="swimsuit-hint" class="text-purple-600 font-bold text-lg">Beni Sürükle! 👆</span>
+                </div>
+
+                <!-- Bırakma Alanı (Karakter) -->
+                <div id="avatar-dropzone" class="dropzone relative w-48 h-64 lg:w-64 lg:h-80 flex flex-col items-center justify-start pt-6 lg:pt-10 bg-white rounded-[3rem] shadow-lg overflow-hidden">
+                    <div id="stage1-avatar" class="text-7xl lg:text-9xl transition-all relative z-30">👦</div>
+                    <div id="swimsuit-overlay" class="absolute bottom-4 lg:bottom-6 w-full left-0 flex items-center justify-center opacity-0 transition-opacity duration-500 z-20">
+                        <div id="swimsuit-icon-overlay" class="text-[7rem] lg:text-[11rem]">🩱</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button id="btn-next-1" onclick="nextStage(2)" class="hidden btn-primary py-3 px-10 lg:py-5 lg:px-16 rounded-2xl lg:rounded-full text-xl lg:text-3xl font-bold mt-4 animate-bounce">
+                Sonraki Göreve Geç ➡️
+            </button>
+        </div>
+
+        <!-- ================= EKRAN 2: HAYIR DEME GÜCÜ ================= -->
+        <div id="screen-stage2" class="screen flex-col items-center text-center gap-4 lg:gap-8">
+            <div class="bg-yellow-100 text-yellow-800 px-4 py-1 lg:px-6 lg:py-2 rounded-full text-sm lg:text-lg font-bold tracking-wide uppercase">Bölüm 2 / 4</div>
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-600">"Hayır!" Deme Gücü 🛑</h2>
+            <p class="text-lg md:text-xl lg:text-2xl text-gray-700 max-w-2xl lg:max-w-4xl">Doğru cevabı tut ve <b>kesik çizgili kutunun içine sürükle!</b></p>
+
+            <div class="w-full bg-emerald-50 rounded-3xl p-4 sm:p-6 lg:p-10 shadow-inner relative max-w-4xl flex flex-col items-center">
+                <!-- Senaryo -->
+                <div id="scenario-bubble" class="bg-white text-lg md:text-2xl lg:text-3xl font-bold text-gray-800 p-6 lg:p-8 rounded-2xl shadow-md mb-6 border-l-8 border-emerald-400 w-full text-center">
+                    <!-- Senaryo metni -->
+                </div>
+                
+                <!-- Bırakma Kutusu -->
+                <div id="answer-dropzone" class="dropzone w-full max-w-md h-32 lg:h-40 bg-white rounded-2xl flex items-center justify-center mb-8">
+                    <span class="text-gray-400 text-xl lg:text-2xl font-bold">Cevabını Buraya Bırak 📥</span>
+                </div>
+
+                <!-- Seçenekler -->
+                <div class="flex flex-col sm:flex-row gap-4 lg:gap-10 justify-center w-full" id="scenario-tokens">
+                    <!-- Dinamik yüklenecek -->
+                </div>
+            </div>
+
+            <div class="mt-4 flex gap-3 lg:gap-4" id="scenario-dots">
+                <div class="w-4 h-4 lg:w-6 lg:h-6 rounded-full bg-emerald-500"></div>
+                <div class="w-4 h-4 lg:w-6 lg:h-6 rounded-full bg-gray-300"></div>
+            </div>
+        </div>
+
+        <!-- ================= EKRAN 3: SÜRPRİZ Mİ SIR MI? ================= -->
+        <div id="screen-stage3" class="screen flex-col items-center text-center gap-4 lg:gap-8">
+            <div class="bg-yellow-100 text-yellow-800 px-4 py-1 lg:px-6 lg:py-2 rounded-full text-sm lg:text-lg font-bold tracking-wide uppercase">Bölüm 3 / 4</div>
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-orange-500">Sürpriz mi, Sır mı? 🎁🤫</h2>
+            <p class="text-base md:text-lg lg:text-2xl text-gray-700 max-w-2xl lg:max-w-5xl">Ortadaki kartı tut ve uygun olan kutuya doğru sürükle!</p>
+
+            <div class="w-full mt-2 lg:mt-6 flex flex-col items-center max-w-5xl relative">
+                
+                <div class="flex w-full justify-between items-center gap-2 lg:gap-10 relative h-[300px] lg:h-[400px]">
+                    
+                    <!-- Sol Kutu -->
+                    <div id="drop-surpriz" class="dropzone w-1/3 h-full bg-pink-50 border-pink-300 rounded-3xl flex flex-col items-center justify-center gap-2 lg:gap-4 shadow-inner">
+                        <span class="text-5xl lg:text-8xl">🎁</span>
+                        <span class="text-base md:text-lg lg:text-3xl font-bold text-pink-700 text-center">Sürpriz<br>Kutusu</span>
+                    </div>
+
+                    <!-- Kart -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+                        <div id="secret-card" class="draggable w-[50%] md:w-[45%] bg-white text-base md:text-xl lg:text-3xl font-bold text-gray-800 p-4 lg:p-8 rounded-2xl shadow-2xl border-4 border-orange-300 text-center cursor-grab pulse-animation pointer-events-auto">
+                            <!-- Soru metni -->
+                        </div>
+                    </div>
+                    
+                    <!-- Sağ Kutu -->
+                    <div id="drop-sir" class="dropzone w-1/3 h-full bg-red-50 border-red-300 rounded-3xl flex flex-col items-center justify-center gap-2 lg:gap-4 shadow-inner">
+                        <span class="text-5xl lg:text-8xl">📢</span>
+                        <span class="text-base md:text-lg lg:text-3xl font-bold text-red-700 text-center">Hemen<br>Anlat!</span>
+                    </div>
+                </div>
+
+            </div>
+            
+            <p class="text-sm lg:text-xl text-gray-500 mt-2 lg:mt-4 font-bold">İlerleme: <span id="secret-counter" class="text-blue-500">1 / 4</span></p>
+        </div>
+
+        <!-- ================= EKRAN 4: GÜVENLİK ÇEMBERİM ================= -->
+        <div id="screen-stage4" class="screen flex-col items-center text-center gap-4 lg:gap-8">
+            <div class="bg-yellow-100 text-yellow-800 px-4 py-1 lg:px-6 lg:py-2 rounded-full text-sm lg:text-lg font-bold tracking-wide uppercase">Son Bölüm!</div>
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-600">Güvenlik Ekibim 🤝</h2>
+            <p class="text-lg md:text-xl lg:text-2xl text-gray-700 max-w-2xl lg:max-w-4xl">Seni koruyacak <b>3 Güvenli Kişiyi</b> bul ve yukarıdaki boşluklara sürükle!</p>
+
+            <div class="bg-blue-50 w-full p-4 lg:p-10 rounded-3xl max-w-5xl shadow-inner border-2 border-blue-100">
+                <div id="team-dropzone" class="dropzone flex justify-center gap-4 lg:gap-8 mb-6 lg:mb-12 p-4 rounded-2xl bg-white/50">
+                    <div class="team-slot w-20 h-20 lg:w-32 lg:h-32 rounded-full border-4 border-dashed border-blue-300 flex items-center justify-center text-3xl lg:text-6xl bg-white shadow-md">1</div>
+                    <div class="team-slot w-20 h-20 lg:w-32 lg:h-32 rounded-full border-4 border-dashed border-blue-300 flex items-center justify-center text-3xl lg:text-6xl bg-white shadow-md">2</div>
+                    <div class="team-slot w-20 h-20 lg:w-32 lg:h-32 rounded-full border-4 border-dashed border-blue-300 flex items-center justify-center text-3xl lg:text-6xl bg-white shadow-md">3</div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 lg:gap-6" id="candidates-grid">
+                    <!-- Dinamik yüklenecek -->
+                </div>
+            </div>
+
+            <button id="btn-finish" onclick="finishGame()" class="hidden btn-primary py-4 px-12 lg:py-6 lg:px-20 rounded-2xl lg:rounded-full text-2xl lg:text-4xl font-bold mt-2 animate-bounce">
+                Sertifikamı Al 🏆
+            </button>
+        </div>
+
+        <!-- ================= EKRAN 5: SERTİFİKA ================= -->
+        <div id="screen-certificate" class="screen flex-col items-center text-center gap-4 lg:gap-8 py-6 lg:py-12">
+            <h2 class="text-4xl md:text-5xl lg:text-7xl font-bold text-yellow-500 mb-2">Tebrikler Kahraman! 🎉</h2>
+            <p class="text-xl md:text-2xl lg:text-4xl text-gray-700 max-w-3xl">Artık bedeninin sınırlarını ve güvenlik balonunu nasıl koruyacağını çok iyi biliyorsun!</p>
+
+            <div class="relative w-full max-w-lg lg:max-w-3xl bg-yellow-50 border-8 border-yellow-300 rounded-3xl p-8 lg:p-12 my-4 lg:my-8 shadow-2xl safety-bubble active">
+                <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23fbbf24\' fill-opacity=\'1\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E');"></div>
+                
+                <h3 class="text-2xl md:text-3xl lg:text-5xl font-bold text-yellow-600 mb-4 lg:mb-8 uppercase tracking-wider">Başarı Sertifikası</h3>
+                <div class="text-7xl lg:text-9xl mb-4 lg:mb-8" id="cert-avatar">👦</div>
+                <p class="text-lg lg:text-2xl text-gray-600">Bu sertifika,</p>
+                <p class="text-4xl lg:text-6xl font-bold text-blue-600 my-4 lg:my-6 uppercase font-serif tracking-wide" id="cert-name">KAHRAMAN</p>
+                <p class="text-lg lg:text-2xl text-gray-600 mb-6 lg:mb-10">"Kendi Bedeninin Patronu" olduğu için verilmiştir.</p>
+                
+                <div class="border-t-4 border-dashed border-yellow-300 pt-6 lg:pt-10 flex justify-around">
+                    <div class="flex flex-col items-center">
+                        <div class="text-3xl lg:text-5xl">🛡️</div>
+                        <p class="text-xs sm:text-sm lg:text-lg font-bold text-gray-500 mt-2 text-center">Güvende<br>Hisseder</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="text-3xl lg:text-5xl">🛑</div>
+                        <p class="text-xs sm:text-sm lg:text-lg font-bold text-gray-500 mt-2 text-center">Hayır<br>Diyebilir</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="text-3xl lg:text-5xl">🗣️</div>
+                        <p class="text-xs sm:text-sm lg:text-lg font-bold text-gray-500 mt-2 text-center">Yardım<br>İster</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-4 px-10 lg:py-5 lg:px-16 rounded-full text-xl lg:text-3xl font-bold transition-all mt-4">
+                🔄 Tekrar Oyna
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let gameState = {
+            name: '', gender: null, avatar: '🐶', stage2Index: 0, stage3Index: 0, selectedTeam: [],
+            currentStage1Story: '', currentScenarios: [], currentSecrets: [], currentCandidates: []
+        };
+
+        // ================= GENİŞLETİLMİŞ VERİ HAVUZLARI =================
+
+        // 1. BÖLÜM: Mayo Kuralı Giriş Hikayeleri (10 Adet)
+        const allStage1Stories = [
+            "Bugün hava çok sıcak, denize girmeye hazırlanıyorsun! 🌊",
+            "Harika bir havuz partisine davetlisin! Hazırlık başlasın! 🏊‍♂️",
+            "Banyodan yeni çıktın, temizlendin ve mis gibi oldun! 🛁",
+            "Tatil köyüne vardınız, hemen havuza koşmak istiyorsun! 🏖️",
+            "Okulun yüzme kursuna gidiyorsun, çok heyecanlısın! 🏅",
+            "Yazlıkta arkadaşlarınla büyük bir su savaşı yapacaksınız! 💦",
+            "Aquapark'a gitmek için eşyalarını topluyorsun, kaydıraklar seni bekliyor! 🎢",
+            "Kumsalda dev bir kumdan kale yapmak için sabırsızlanıyorsun! 🏖️",
+            "Yaz kampında gölde yüzme saati geldi çattı! 🛶",
+            "Ailece termal otele geldiniz, ılık suda yüzme vakti! 🏨"
+        ];
+
+        // 2. BÖLÜM: Senaryolar (16 Adet)
+        const allScenarios = [
+            { text: "Arkadaşın oyunu kazandığınız için seninle 'çak bir beşlik' yapmak istiyor.", options: [ { text: "👍 Çak Beşlik!", safe: true, reply: "Harika! Arkadaşça ve güvenli dokunuşlar güzeldir." }, { text: "🛑 İstemiyorum", safe: true, reply: "Tabii ki! Canın istemiyorsa arkadaşça bir dokunuşa bile hayır diyebilirsin." } ] },
+            { text: "Tanıdığın biri sana zorla sarılmak ve seni öpmek istiyor, ama sen o an rahatsız hissediyorsun.", options: [ { text: "😔 Katlanmalıyım", safe: false, reply: "Dur bakalım! İstemediğin hiçbir dokunuşa katlanmak zorunda değilsin. Bedenin sana aittir!" }, { text: "🛑 HAYIR de", safe: true, reply: "Süper! 'Hayır, istemiyorum' diyerek sınırını korudun. Sen çok güçlüsün!" } ] },
+            { text: "Bir akraban yanaklarını çok sıkarak seni öpmek istiyor ama canın acıyor.", options: [ { text: "🤐 Ses çıkarma", safe: false, reply: "Hayır! Canını yakan hiçbir sevgi gösterisine katlanmak zorunda değilsin." }, { text: "🛑 Dur de!", safe: true, reply: "Harika! 'Canım acıyor, lütfen yapma' demek senin en doğal hakkındır." } ] },
+            { text: "Doktor, anne veya babanın yanında seni muayene etmek için bedenine dokunması gerektiğini söylüyor.", options: [ { text: "🩺 İzin ver", safe: true, reply: "Doğru! Doktorlar sağlığımız için, SADECE ailemizin yanında bize dokunabilirler." }, { text: "🏃 Kaç", safe: false, reply: "Korkmana gerek yok. Doktorlar sağlığımız için ailemizin yanında muayene edebilir. Bu güvenlidir." } ] },
+            { text: "Okulda bir arkadaşın şaka yapmak için senin özel bölgene dokunmaya çalışıyor.", options: [ { text: "😂 Gülüp geç", safe: false, reply: "Özel bölgeler şaka konusu yapılamaz! Buna asla izin vermemelisin." }, { text: "🛑 Öğretmene söyle", safe: true, reply: "Çok doğru! Özel bölgene dokunmaya çalışan birini hemen güvendiğin bir büyüğüne söylemelisin." } ] },
+            { text: "Parkta oynarken tanımadığın bir teyze sana şeker verip saçını okşamak istedi.", options: [ { text: "🛑 Uzaklaş", safe: true, reply: "Harika karar! Tanımadığımız kişilerden hediye almaz ve dokunmalarına izin vermeyiz." }, { text: "🍬 Şekeri al", safe: false, reply: "Dikkat! Ailemizin izni olmadan tanımadığımız kişilerden asla bir şey almamalıyız." } ] },
+            { text: "Oyun oynarken bir arkadaşın sürekli sana vurarak, canını acıtarak şaka yapıyor.", options: [ { text: "🛑 Yapma de", safe: true, reply: "Doğru! Bedenine zarar veren hiçbir şey 'şaka' olamaz." }, { text: "👊 Sen de ona vur", safe: false, reply: "Kavga etmek yerine yüksek sesle 'DUR' demeli ve bir öğretmene haber vermelisin." } ] },
+            { text: "İnternette oynadığın oyunda biri sana nerede yaşadığını sordu.", options: [ { text: "🏠 Adresini ver", safe: false, reply: "Çok Tehlikeli! İnternetteki kişilere asla gerçek bilgilerini vermemelisin." }, { text: "🛑 Oyundan Çık", safe: true, reply: "Süper! İnternetteki yabancılarla özel bilgiler paylaşılmaz, hemen ailene haber vermelisin." } ] },
+            { text: "Komşunuz seni sevmek için zorla kucağına oturtmak istiyor ve sen istemiyorsun.", options: [ { text: "🤫 Sessiz kal", safe: false, reply: "Sessiz kalmak zorunda değilsin. İstemiyorsan hemen oradan kalkabilirsin." }, { text: "🛑 İnmek İstiyorum", safe: true, reply: "Çok iyi! Kendi bedenin hakkında kararları sen verirsin." } ] },
+            { text: "Okul servisinde yanına oturan büyük bir çocuk bacağına dokunuyor ve seni rahatsız ediyor.", options: [ { text: "🗣️ Şoföre Söyle", safe: true, reply: "Aferin! Rahatsız olduğun durumu hemen güvendiğin bir yetişkine anlatmalısın." }, { text: "🙈 Görmezden gel", safe: false, reply: "Görmezden gelmek sorunu çözmez. Beden sınırların ihlal edildiğinde mutlaka yardım istemelisin." } ] },
+            { text: "Sokakta yürürken tanımadığın biri sana 'Çok tatlısın, gel beraber fotoğraf çekilelim' diyor.", options: [ { text: "📸 Poz ver", safe: false, reply: "Tanımadığımız kişilerin bizim fotoğrafımızı çekmesi güvenli değildir. İzin verme!" }, { text: "🛑 Hayır de, uzaklaş", safe: true, reply: "Harika karar! Tanımadığın insanlara mesafe koymak çok doğru bir davranıştır." } ] },
+            { text: "Mağazada kıyafet denerken kabine tanımadığın bir mağaza görevlisi girmek istiyor.", options: [ { text: "🚪 Girmesine izin ver", safe: false, reply: "Kıyafet değiştirirken kabin senin özel alanındır. Kimsenin girmesine izin vermemelisin." }, { text: "🛑 'Dolu!' de", safe: true, reply: "Çok doğru! Sadece kendi ailen yardım için yanına gelebilir." } ] },
+            { text: "Oyun parkında tanımadığın bir yetişkin seni salıncakta sallamak ve gıdıklamak istiyor.", options: [ { text: "🛑 'Hayır, dokunma'", safe: true, reply: "Süper! Tanımadığımız yetişkinlerle bu tarz fiziksel oyunlar oynamayız." }, { text: "🎠 İzin ver", safe: false, reply: "Eğlenceli görünse bile, yabancıların sana dokunmasına ve gıdıklamasına izin vermemelisin." } ] },
+            { text: "Öğretmenin sana okul başarı belgesi verirken tebrik etmek için hafifçe omzuna dokundu.", options: [ { text: "😊 Teşekkür et", safe: true, reply: "Evet, bu güvenli ve cesaretlendirici bir dokunuştur. Sorun yoktur." }, { text: "😨 Kork ve ağla", safe: false, reply: "Öğretmenlerin başarıları tebrik etmek için omza veya kola hafifçe dokunması güvenlidir." } ] },
+            { text: "Kuaför / Berber saçını keserken sadece saçına, boynuna ve başına dokunuyor.", options: [ { text: "✂️ Bu güvenlidir", safe: true, reply: "Doğru. Saç kesimi için kuaförün saçına dokunması işinin bir parçasıdır ve güvenlidir." }, { text: "🛑 İzin verme", safe: false, reply: "Kuaförün ailenin yanında saçını kesmek için dokunması normal ve güvenli bir durumdur." } ] },
+            { text: "Yolda yürürken tanımadığın biri sana yaklaşıp 'Annene gidiyoruz, benimle arabaya bin' diyor.", options: [ { text: "🚗 Arabaya bin", safe: false, reply: "ÇOK TEHLİKELİ! Ailenin haberi olmadan asla yabancıların arabasına binmemelisin." }, { text: "🏃‍♂️ Koşarak uzaklaş", safe: true, reply: "Mükemmel! Tanımadığın biriyle hiçbir yere gitmemeli ve hemen oradan uzaklaşmalısın." } ] }
+        ];
+
+        // 3. BÖLÜM: Sır ve Sürpriz Havuzu (22 Adet)
+        const allSecrets = [
+            { text: "Annene doğum günü için bir hediye aldık, ona sakın söyleme!", type: "surpriz" },
+            { text: "Yarın okul çıkışı babana sürpriz bir pasta alacağız, çaktırma!", type: "surpriz" },
+            { text: "Öğretmenler günü için öğretmenimize hediye aldık, sınıfa gelene kadar aramızda.", type: "surpriz" },
+            { text: "Abinle babana tuttukları takımın maç biletini aldınız, akşam görecek.", type: "surpriz" },
+            { text: "Kardeşine çok istediği o oyuncağı aldım, akşam yemeğinde vereceğim.", type: "surpriz" },
+            { text: "Hafta sonu lunaparka gideceğiz ama annene söyleme, ona sürpriz olsun.", type: "surpriz" },
+            { text: "Babalar günü için babana kendi ellerinle kart hazırladın, yastığının altına sakladın.", type: "surpriz" },
+            { text: "En yakın arkadaşının doğum günü partisini planlıyorsunuz, o gelene kadar susmalısın.", type: "surpriz" },
+            { text: "Annene kendi harçlığınla çok tatlı bir toka aldın, cebinde saklıyorsun.", type: "surpriz" },
+            { text: "Dedeni havaalanından gizlice almaya gidiyorsunuz, evdekilere haber vermediniz.", type: "surpriz" },
+            
+            { text: "Sana bu oyuncakları veririm ama bu bizim aramızda bir sır kalsın, ailene söyleme.", type: "sir" },
+            { text: "Sana telefonumdan gösterdiğim bu resmi annene babana anlatma, yoksa sana kızarlar.", type: "sir" },
+            { text: "İnternetten konuştuğun biri senden fotoğrafını istedi ve 'bunu sır olarak sakla' dedi.", type: "sir" },
+            { text: "Komşu teyze sana tabletinde gizli bir oyun gösterdi ama 'bunu kimseye anlatma' dedi.", type: "sir" },
+            { text: "Parktaki bir abi sana harika bir oyuncak verdi ama 'Bunu annene söyleme, geri alırım' dedi.", type: "sir" },
+            { text: "Okulda bir büyük öğrenci paranı aldı ve 'Öğretmene söylersen seni döverim' dedi.", type: "sir" },
+            { text: "Biri sana izinsiz dokundu ve 'Eğer ailene anlatırsan başın belaya girer' diyerek seni korkuttu.", type: "sir" },
+            { text: "Oyunda tanıştığın biri sana 'Ailen görmeden bana evinin fotoğrafını at' dedi.", type: "sir" },
+            { text: "Okul tuvaletinde büyük bir çocuk seni sıkıştırdı ve 'Bunu kimseye söyleme' dedi.", type: "sir" },
+            { text: "İnternette tanıştığın biri 'Ailenin kredi kartı numarasını gönder, aramızda sır' dedi.", type: "sir" },
+            { text: "Parktaki bir teyze seni evine davet etti ve 'Annene söylemene gerek yok, hemen dönersin' dedi.", type: "sir" },
+            { text: "Bir akraban sana izinsiz bir video izletti ve 'Bu bizim küçük sırrımız olsun' dedi.", type: "sir" }
+        ];
+
+        // 4. BÖLÜM: Güvenlik Çemberi Adayları (24 Adet)
+        const allCandidates = [
+            { id: 1, name: "Anne", icon: "👩", safe: true },
+            { id: 2, name: "Baba", icon: "👨", safe: true },
+            { id: 3, name: "Sınıf Öğretmeni", icon: "👩‍🏫", safe: true },
+            { id: 4, name: "Rehber Öğretmen", icon: "🏫", safe: true },
+            { id: 5, name: "Polis Memuru", icon: "👮", safe: true },
+            { id: 6, name: "Jandarma", icon: "👮‍♂️", safe: true },
+            { id: 7, name: "Doktor", icon: "👨‍⚕️", safe: true },
+            { id: 8, name: "Okul Müdürü", icon: "👨‍💼", safe: true },
+            { id: 9, name: "Okul Güvenliği", icon: "💂", safe: true },
+            { id: 10, name: "112 Acil Operatörü", icon: "🚑", safe: true },
+            { id: 11, name: "Okul Hemşiresi", icon: "🏥", safe: true },
+            { id: 12, name: "Park Görevlisi", icon: "🌳", safe: true },
+
+            { id: 13, name: "Parktaki Yabancı", icon: "👤", safe: false },
+            { id: 14, name: "İnternetteki Biri", icon: "💻", safe: false },
+            { id: 15, name: "'Annene Götüreyim' Diyen Biri", icon: "🚐", safe: false },
+            { id: 16, name: "Tanımadığın Kurye", icon: "📦", safe: false },
+            { id: 17, name: "Yoldan Geçen Biri", icon: "🚶", safe: false },
+            { id: 18, name: "Şeker Veren Yabancı", icon: "🍬", safe: false },
+            { id: 19, name: "Sosyal Medya Takipçisi", icon: "📱", safe: false },
+            { id: 20, name: "İnternetten Gelen Link", icon: "🔗", safe: false },
+            { id: 21, name: "Yabancı Araba Sürücüsü", icon: "🚗", safe: false },
+            { id: 22, name: "Sokaktaki Gizemli Kişi", icon: "🕵️", safe: false },
+            { id: 23, name: "Seni Takip Eden Biri", icon: "👀", safe: false },
+            { id: 24, name: "Oyundaki Yabancı Oyuncu", icon: "🎮", safe: false }
+        ];
+
+        // --- RASTGELE SEÇİM ---
+        function shuffleArray(array) {
+            return [...array].sort(() => 0.5 - Math.random());
+        }
+
+        // Kazanmayı garanti altına alan havuz algoritması
+        function generateStage4Candidates() {
+            const safeCands = allCandidates.filter(c => c.safe);
+            const unsafeCands = allCandidates.filter(c => !c.safe);
+            const selectedSafes = shuffleArray(safeCands).slice(0, 3);
+            const selectedUnsafes = shuffleArray(unsafeCands).slice(0, 3);
+            return shuffleArray([...selectedSafes, ...selectedUnsafes]);
+        }
+
+        // --- EVRENSEL SÜRÜKLE BIRAK MOTORU ---
+        function makeDraggable(element, dropzoneSelectors, onDropCallback) {
+            if (!element) return;
+            let isDragging = false, startX = 0, startY = 0, currentX = 0, currentY = 0;
+            element.style.transform = `translate(0px, 0px)`;
+            
+            const onPointerDown = (e) => {
+                isDragging = true;
+                element.classList.remove('pulse-animation');
+                element.style.cursor = 'grabbing';
+                element.style.zIndex = '1000';
+                element.style.transition = 'none';
+                startX = e.clientX - currentX;
+                startY = e.clientY - currentY;
+                element.setPointerCapture(e.pointerId);
+                dropzoneSelectors.forEach(sel => document.querySelector(sel)?.classList.add('highlight'));
+            };
+
+            const onPointerMove = (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                currentX = e.clientX - startX;
+                currentY = e.clientY - startY;
+                element.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            };
+
+            const onPointerUp = (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                element.style.cursor = 'grab';
+                element.style.zIndex = '50';
+                element.releasePointerCapture(e.pointerId);
+                dropzoneSelectors.forEach(sel => document.querySelector(sel)?.classList.remove('highlight'));
+
+                const rect = element.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2;
+                let matchedZone = null;
+                for (let selector of dropzoneSelectors) {
+                    const dz = document.querySelector(selector);
+                    if (dz) {
+                        const dzRect = dz.getBoundingClientRect();
+                        if (centerX >= dzRect.left && centerX <= dzRect.right && centerY >= dzRect.top && centerY <= dzRect.bottom) {
+                            matchedZone = selector; break;
+                        }
+                    }
+                }
+
+                const revert = () => {
+                    element.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    currentX = 0; currentY = 0;
+                    element.style.transform = `translate(0px, 0px)`;
+                    setTimeout(() => element.classList.add('pulse-animation'), 400);
+                };
+
+                if (matchedZone) onDropCallback(element, matchedZone, revert);
+                else revert();
+            };
+
+            element.addEventListener('pointerdown', onPointerDown);
+            element.addEventListener('pointermove', onPointerMove);
+            element.addEventListener('pointerup', onPointerUp);
+            element.addEventListener('pointercancel', onPointerUp);
+        }
+
+        // --- YARDIMCI FONKSİYONLAR ---
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function selectAvatar(element, icon) {
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            gameState.avatar = icon;
+        }
+
+        function selectGender(element, gender) {
+            document.querySelectorAll('.gender-option').forEach(el => el.classList.remove('selected', 'erkek', 'kiz'));
+            element.classList.add('selected', gender);
+            gameState.gender = gender;
+        }
+
+        // --- OYUNA BAŞLA ---
+        function startGame() {
+            if (!gameState.gender) { Swal.fire({ icon: 'warning', title: 'Bir saniye!', text: 'Lütfen önce kız mısın erkek misin, onu seç.', width: window.innerWidth > 1024 ? '600px' : 'auto' }); return; }
+
+            gameState.name = 'Kahraman';
+            document.getElementById('player-name-display').innerText = gameState.name;
+            document.getElementById('player-avatar-display').innerText = gameState.avatar;
+            document.getElementById('stage1-avatar').innerText = gameState.avatar;
+            document.getElementById('top-bar').classList.remove('hidden');
+            document.getElementById('top-bar').classList.add('flex');
+
+            // Havuz Seçimleri
+            gameState.currentStage1Story = shuffleArray(allStage1Stories)[0];
+            document.getElementById('stage1-story').innerText = gameState.currentStage1Story;
+            gameState.currentScenarios = shuffleArray(allScenarios).slice(0, 2);
+            gameState.currentSecrets = shuffleArray(allSecrets).slice(0, 4);
+            gameState.currentCandidates = generateStage4Candidates();
+
+            // Cinsiyet Görseli Ayarla
+            if (gameState.gender === 'erkek') {
+                document.getElementById('stage1-title').innerText = "Mayo Kuralı 🩳";
+                document.getElementById('stage1-desc').innerHTML = `Bedeninde sadece sana ait olan "Özel Bölgeler" vardır. <b>Aşağıdaki deniz şortunu tutup karakterinin üzerine sürükle!</b>`;
+                document.getElementById('swimsuit-icon-drag').innerText = "🩳";
+                document.getElementById('swimsuit-icon-overlay').innerText = "🩳";
+                document.getElementById('swimsuit-draggable').classList.replace('border-purple-300', 'border-blue-300');
+                document.getElementById('swimsuit-hint').classList.replace('text-purple-600', 'text-blue-600');
+            } else {
+                document.getElementById('stage1-title').innerText = "Mayo Kuralı 🩱";
+                document.getElementById('stage1-desc').innerHTML = `Bedeninde sadece sana ait olan "Özel Bölgeler" vardır. <b>Aşağıdaki mayoyu tutup karakterinin üzerine sürükle!</b>`;
+                document.getElementById('swimsuit-icon-drag').innerText = "🩱";
+                document.getElementById('swimsuit-icon-overlay').innerText = "🩱";
+                document.getElementById('swimsuit-draggable').classList.replace('border-blue-300', 'border-purple-300');
+                document.getElementById('swimsuit-hint').classList.replace('text-blue-600', 'text-purple-600');
+            }
+
+            showScreen('screen-stage1');
+            initStage1();
+        }
+
+        function nextStage(stageNum) {
+            if (stageNum === 2) { showScreen('screen-stage2'); loadScenario(); }
+            else if (stageNum === 3) { showScreen('screen-stage3'); loadSecret(); }
+            else if (stageNum === 4) { showScreen('screen-stage4'); loadCandidates(); }
+        }
+
+        // --- BÖLÜM 1 ---
+        function initStage1() {
+            makeDraggable(document.getElementById('swimsuit-draggable'), ['#avatar-dropzone'], (element, zone, revert) => {
+                element.style.display = 'none';
+                document.getElementById('swimsuit-overlay').classList.remove('opacity-0');
+                document.getElementById('swimsuit-overlay').classList.add('opacity-100');
+
+                let ruleText = gameState.gender === 'erkek' 
+                    ? 'Erkeklerin özel bölgeleri bacak araları ve popolarıdır. Buraları deniz şortumuz kapatır. Temizlik veya doktor kontrolü dışında KİMSE İZİNSİZ DOKUNAMAZ VE BAKAMAZ!'
+                    : 'Kızların özel bölgeleri göğüsleri, bacak araları ve popolarıdır. Buraları mayomuz kapatır. Temizlik veya doktor kontrolü dışında KİMSE İZİNSİZ DOKUNAMAZ VE BAKAMAZ!';
+                
+                Swal.fire({ title: 'Harika!', text: ruleText, icon: 'success', confirmButtonText: 'Anladım! 💪', confirmButtonColor: gameState.gender === 'erkek' ? '#3b82f6' : '#ec4899', width: window.innerWidth > 1024 ? '800px' : 'auto' }).then(() => {
+                    document.getElementById('btn-next-1').classList.remove('hidden');
+                });
+            });
+        }
+
+        // --- BÖLÜM 2 ---
+        function loadScenario() {
+            if (gameState.stage2Index >= gameState.currentScenarios.length) {
+                Swal.fire({ title: 'Bölüm Tamamlandı!', text: 'Güvenli ve güvensiz temasın farkını çok iyi biliyorsun!', icon: 'success', confirmButtonText: 'Devam Et', confirmButtonColor: '#10b981' }).then(() => nextStage(3));
+                return;
+            }
+            const current = gameState.currentScenarios[gameState.stage2Index];
+            document.getElementById('scenario-bubble').innerText = current.text;
+            
+            const btnContainer = document.getElementById('scenario-tokens');
+            btnContainer.innerHTML = '';
+            
+            current.options.forEach((opt) => {
+                const token = document.createElement('div');
+                token.className = 'draggable flex-1 py-4 px-2 lg:py-6 lg:px-4 rounded-2xl lg:rounded-3xl text-lg lg:text-3xl font-bold text-center border-4 bg-white cursor-grab shadow-lg pulse-animation';
+                if (opt.text.includes('HAYIR') || opt.text.includes('İstemiyorum') || opt.text.includes('Dur') || opt.text.includes('İzin verme') || opt.text.includes('Uzaklaş') || opt.text.includes('Çık')) {
+                    token.classList.add('border-red-400', 'text-red-600');
+                } else {
+                    token.classList.add('border-emerald-400', 'text-emerald-600');
+                }
+                token.innerText = opt.text; token.dataset.safe = opt.safe; token.dataset.reply = opt.reply;
+                btnContainer.appendChild(token);
+
+                makeDraggable(token, ['#answer-dropzone'], (el, zone, revert) => {
+                    const isSafe = el.dataset.safe === 'true';
+                    if (isSafe) {
+                        Swal.fire({ title: 'Doğru Karar! 🌟', text: el.dataset.reply, icon: 'success', confirmButtonText: 'Devam Et', confirmButtonColor: '#10b981' }).then(() => {
+                            gameState.stage2Index++; loadScenario();
+                        });
+                    } else {
+                        Swal.fire({ title: 'Bir Saniye... 🛑', text: el.dataset.reply, icon: 'warning', confirmButtonText: 'Tekrar Düşün', confirmButtonColor: '#f59e0b' }).then(() => {
+                            revert(); // Yanlışsa kartı geri gönder, ilerleme
+                        });
+                    }
+                });
+            });
+
+            const dots = document.getElementById('scenario-dots').children;
+            for(let i=0; i<dots.length; i++) dots[i].className = i <= gameState.stage2Index ? 'w-4 h-4 lg:w-6 lg:h-6 rounded-full bg-emerald-500' : 'w-4 h-4 lg:w-6 lg:h-6 rounded-full bg-gray-300';
+        }
+
+        // --- BÖLÜM 3 ---
+        function loadSecret() {
+            if (gameState.stage3Index >= gameState.currentSecrets.length) {
+                Swal.fire({ title: 'Bölüm Tamamlandı!', text: 'Kötü sırları saklamayıp GÜVENLİ KİŞİLERE anlatacağını öğrendin!', icon: 'success', confirmButtonText: 'Son Bölüme Geç', confirmButtonColor: '#f97316' }).then(() => nextStage(4));
+                return;
+            }
+            const current = gameState.currentSecrets[gameState.stage3Index];
+            
+            // Önceki sorulardan kalan "gizli tıklama dinleyicilerini" sıfırlamak için kartı klonlayıp yeniliyoruz (Atlama sorununu çözer)
+            let oldCard = document.getElementById('secret-card');
+            let card = oldCard.cloneNode(true);
+            oldCard.parentNode.replaceChild(card, oldCard);
+
+            card.style.transition = 'none'; card.style.transform = `translate(0px, 0px)`;
+            
+            setTimeout(() => {
+                card.innerText = `"${current.text}"`;
+                makeDraggable(card, ['#drop-surpriz', '#drop-sir'], (el, zone, revert) => {
+                    const selectedType = zone === '#drop-surpriz' ? 'surpriz' : 'sir';
+                    if (current.type === selectedType) {
+                        let msg = selectedType === 'surpriz' ? 'Doğru! Sürprizler mutlu eder.' : 'Harika! Kötü sırları hemen büyüklere anlatmalısın!';
+                        Swal.fire({ toast: true, position: 'top', icon: 'success', title: msg, showConfirmButton: false, timer: 2000 });
+                        gameState.stage3Index++;
+                        el.style.transition = 'transform 0.5s, opacity 0.5s'; el.style.transform += ' scale(0)'; el.style.opacity = '0';
+                        setTimeout(() => { el.style.opacity = '1'; loadSecret(); }, 500);
+                    } else {
+                        let errorMsg = selectedType === 'surpriz' ? 'Dikkat! Eğer biri seni korkutuyor ve saklamanı istiyorsa bu KÖTÜ BİR SIRDIR.' : 'Aslında bu zararsız bir sürpriz! Sadece kısa bir süre mutlu bir olay için saklanacak.';
+                        Swal.fire({ title: 'Tekrar Düşün 🤔', text: errorMsg, icon: 'warning', confirmButtonColor: '#f97316' });
+                        revert();
+                    }
+                });
+            }, 50);
+            
+            let displayIndex = Math.min(gameState.stage3Index + 1, gameState.currentSecrets.length);
+            document.getElementById('secret-counter').innerText = `${displayIndex} / ${gameState.currentSecrets.length}`;
+        }
+
+        // --- BÖLÜM 4 ---
+        function loadCandidates() {
+            const grid = document.getElementById('candidates-grid');
+            grid.innerHTML = '';
+            gameState.currentCandidates.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'draggable bg-white border-4 border-blue-200 rounded-2xl lg:rounded-3xl p-2 lg:p-4 flex flex-col items-center justify-center gap-1 hover:bg-blue-50 shadow-sm cursor-grab relative z-10 h-32 lg:h-48';
+                card.innerHTML = `<span class="text-4xl lg:text-6xl">${c.icon}</span><span class="font-bold text-gray-700 text-xs md:text-sm lg:text-xl text-center leading-tight">${c.name}</span>`;
+                grid.appendChild(card);
+
+                makeDraggable(card, ['#team-dropzone'], (el, zone, revert) => {
+                    if (gameState.selectedTeam.length >= 3) { revert(); return; }
+                    if (!c.safe) {
+                        Swal.fire({ title: 'Dikkat! 🛑', text: `${c.name} seni korumak için doğru kişi olmayabilir.`, icon: 'error', confirmButtonColor: '#ef4444' });
+                        revert(); return;
+                    }
+                    if (!gameState.selectedTeam.includes(c.id)) {
+                        gameState.selectedTeam.push(c.id);
+                        el.style.visibility = 'hidden';
+                        updateTeamUI(c);
+                        if (gameState.selectedTeam.length === 3) {
+                            document.getElementById('btn-finish').classList.remove('hidden');
+                            Swal.fire({ title: 'Harika Ekip!', text: 'Güvenlik ekibini kurdun! Başın sıkışırsa hemen onlara koş.', icon: 'success', confirmButtonColor: '#3b82f6' });
+                        }
+                    } else revert();
+                });
+            });
+        }
+
+        function updateTeamUI(candidate) {
+            const slots = document.querySelectorAll('.team-slot');
+            const index = gameState.selectedTeam.length - 1;
+            slots[index].innerHTML = `<span class="text-4xl lg:text-6xl animate-bounce">${candidate.icon}</span>`;
+            slots[index].classList.replace('border-dashed', 'border-solid');
+            slots[index].classList.replace('border-blue-300', 'border-green-500');
+            slots[index].classList.add('bg-green-50');
+        }
+
+        // --- BİTİŞ ---
+        function finishGame() {
+            document.getElementById('top-bar').classList.add('hidden');
+            document.getElementById('top-bar').classList.remove('flex');
+            document.getElementById('cert-name').innerText = gameState.name;
+            document.getElementById('cert-avatar').innerText = gameState.avatar;
+            showScreen('screen-certificate');
+            fireConfetti();
+            if(window.innerWidth > 1024) setTimeout(fireConfetti, 1000);
+        }
+
+        function fireConfetti() {
+            const end = Date.now() + 3000;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#3b82f6', '#10b981', '#f59e0b'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#3b82f6', '#10b981', '#f59e0b'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+    </script>
+</body>
+</html>

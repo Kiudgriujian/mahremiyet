@@ -14,7 +14,7 @@
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <!-- Google Fonts (Türkçe karakter destekli, çocuk dostu yuvarlak font: Nunito) -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -185,23 +185,23 @@
             </div>
         </div>
 
-        <!-- ================= EKRAN 1: MAYO KURALI ================= -->
+        <!-- ================= EKRAN 1: KIYAFET KURALI ================= -->
         <div id="screen-stage1" class="screen flex-col items-center text-center gap-4 lg:gap-8">
             <div class="bg-yellow-100 text-yellow-800 px-4 py-1 lg:px-6 lg:py-2 rounded-full text-sm lg:text-lg font-bold tracking-wide uppercase">Bölüm 1 / 4</div>
-            <h2 id="stage1-title" class="text-3xl md:text-4xl lg:text-5xl font-bold text-purple-600">Mayo Kuralı 🩱</h2>
+            <h2 id="stage1-title" class="text-3xl md:text-4xl lg:text-5xl font-bold text-purple-600">Özel Bölgelerim 👗👔</h2>
             
             <div id="stage1-story" class="bg-white px-6 py-3 rounded-2xl shadow-sm border-2 border-purple-200 text-purple-700 font-bold text-lg md:text-xl lg:text-2xl transform -rotate-1 my-2 max-w-3xl">
                 Hikaye buraya gelecek...
             </div>
             
-            <p id="stage1-desc" class="text-lg md:text-xl lg:text-2xl text-gray-700 max-w-2xl lg:max-w-4xl">Bedeninde sadece sana ait olan "Özel Bölgeler" vardır. <b>Aşağıdaki mayoyu tutup karakterinin üzerine sürükle!</b></p>
+            <p id="stage1-desc" class="text-lg md:text-xl lg:text-2xl text-gray-700 max-w-2xl lg:max-w-4xl">Bedeninde sadece sana ait olan "Özel Bölgeler" vardır. <b>Aşağıdaki kıyafeti tutup karakterinin üzerine sürükle!</b></p>
             
             <div class="flex flex-col md:flex-row items-center gap-10 md:gap-20 my-4 lg:my-8 bg-purple-50 p-6 lg:p-12 rounded-3xl w-full justify-center shadow-inner relative">
                 
                 <!-- Sürüklenen Öğe -->
                 <div class="flex flex-col items-center gap-2 z-50">
                     <div id="swimsuit-draggable" class="draggable bg-white rounded-2xl shadow-lg p-4 pulse-animation flex items-center justify-center w-32 h-32 lg:w-40 lg:h-40 border-4 border-purple-300">
-                        <span id="swimsuit-icon-drag" class="text-7xl lg:text-8xl">🩱</span>
+                        <span id="swimsuit-icon-drag" class="text-7xl lg:text-8xl">👗</span>
                     </div>
                     <span id="swimsuit-hint" class="text-purple-600 font-bold text-lg">Beni Sürükle! 👆</span>
                 </div>
@@ -210,7 +210,7 @@
                 <div id="avatar-dropzone" class="dropzone relative w-48 h-64 lg:w-64 lg:h-80 flex flex-col items-center justify-start pt-6 lg:pt-10 bg-white rounded-[3rem] shadow-lg overflow-hidden">
                     <div id="stage1-avatar" class="text-7xl lg:text-9xl transition-all relative z-30">👦</div>
                     <div id="swimsuit-overlay" class="absolute bottom-4 lg:bottom-6 w-full left-0 flex items-center justify-center opacity-0 transition-opacity duration-500 z-20">
-                        <div id="swimsuit-icon-overlay" class="text-[7rem] lg:text-[11rem]">🩱</div>
+                        <div id="swimsuit-icon-overlay" class="text-[7rem] lg:text-[11rem]">👗</div>
                     </div>
                 </div>
 
@@ -228,17 +228,14 @@
             <p class="text-lg md:text-xl lg:text-2xl text-gray-700 max-w-2xl lg:max-w-4xl">Doğru cevabı tut ve <b>kesik çizgili kutunun içine sürükle!</b></p>
 
             <div class="w-full bg-emerald-50 rounded-3xl p-4 sm:p-6 lg:p-10 shadow-inner relative max-w-4xl flex flex-col items-center">
-                <!-- Senaryo -->
                 <div id="scenario-bubble" class="bg-white text-lg md:text-2xl lg:text-3xl font-bold text-gray-800 p-6 lg:p-8 rounded-2xl shadow-md mb-6 border-l-8 border-emerald-400 w-full text-center">
                     <!-- Senaryo metni -->
                 </div>
                 
-                <!-- Bırakma Kutusu -->
                 <div id="answer-dropzone" class="dropzone w-full max-w-md h-32 lg:h-40 bg-white rounded-2xl flex items-center justify-center mb-8">
                     <span class="text-gray-400 text-xl lg:text-2xl font-bold">Cevabını Buraya Bırak 📥</span>
                 </div>
 
-                <!-- Seçenekler -->
                 <div class="flex flex-col sm:flex-row gap-4 lg:gap-10 justify-center w-full" id="scenario-tokens">
                     <!-- Dinamik yüklenecek -->
                 </div>
@@ -257,29 +254,24 @@
             <p class="text-base md:text-lg lg:text-2xl text-gray-700 max-w-2xl lg:max-w-5xl">Ortadaki kartı tut ve uygun olan kutuya doğru sürükle!</p>
 
             <div class="w-full mt-2 lg:mt-6 flex flex-col items-center max-w-5xl relative">
-                
                 <div class="flex w-full justify-between items-center gap-2 lg:gap-10 relative h-[300px] lg:h-[400px]">
                     
-                    <!-- Sol Kutu -->
                     <div id="drop-surpriz" class="dropzone w-1/3 h-full bg-pink-50 border-pink-300 rounded-3xl flex flex-col items-center justify-center gap-2 lg:gap-4 shadow-inner">
                         <span class="text-5xl lg:text-8xl">🎁</span>
                         <span class="text-base md:text-lg lg:text-3xl font-bold text-pink-700 text-center">Sürpriz<br>Kutusu</span>
                     </div>
 
-                    <!-- Kart -->
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
                         <div id="secret-card" class="draggable w-[50%] md:w-[45%] bg-white text-base md:text-xl lg:text-3xl font-bold text-gray-800 p-4 lg:p-8 rounded-2xl shadow-2xl border-4 border-orange-300 text-center cursor-grab pulse-animation pointer-events-auto">
                             <!-- Soru metni -->
                         </div>
                     </div>
                     
-                    <!-- Sağ Kutu -->
                     <div id="drop-sir" class="dropzone w-1/3 h-full bg-red-50 border-red-300 rounded-3xl flex flex-col items-center justify-center gap-2 lg:gap-4 shadow-inner">
                         <span class="text-5xl lg:text-8xl">📢</span>
                         <span class="text-base md:text-lg lg:text-3xl font-bold text-red-700 text-center">Hemen<br>Anlat!</span>
                     </div>
                 </div>
-
             </div>
             
             <p class="text-sm lg:text-xl text-gray-500 mt-2 lg:mt-4 font-bold">İlerleme: <span id="secret-counter" class="text-blue-500">1 / 4</span></p>
@@ -347,24 +339,24 @@
 
     <script>
         let gameState = {
-            name: '', gender: null, avatar: '🐶', stage2Index: 0, stage3Index: 0, selectedTeam: [],
+            name: 'Kahraman', gender: null, avatar: '🐶', stage2Index: 0, stage3Index: 0, selectedTeam: [],
             currentStage1Story: '', currentScenarios: [], currentSecrets: [], currentCandidates: []
         };
 
         // ================= GENİŞLETİLMİŞ VERİ HAVUZLARI =================
 
-        // 1. BÖLÜM: Mayo Kuralı Giriş Hikayeleri (10 Adet)
+        // 1. BÖLÜM: Kıyafet Kuralı Giriş Hikayeleri (10 Adet Elbise/Takım temalı)
         const allStage1Stories = [
-            "Bugün hava çok sıcak, denize girmeye hazırlanıyorsun! 🌊",
-            "Harika bir havuz partisine davetlisin! Hazırlık başlasın! 🏊‍♂️",
-            "Banyodan yeni çıktın, temizlendin ve mis gibi oldun! 🛁",
-            "Tatil köyüne vardınız, hemen havuza koşmak istiyorsun! 🏖️",
-            "Okulun yüzme kursuna gidiyorsun, çok heyecanlısın! 🏅",
-            "Yazlıkta arkadaşlarınla büyük bir su savaşı yapacaksınız! 💦",
-            "Aquapark'a gitmek için eşyalarını topluyorsun, kaydıraklar seni bekliyor! 🎢",
-            "Kumsalda dev bir kumdan kale yapmak için sabırsızlanıyorsun! 🏖️",
-            "Yaz kampında gölde yüzme saati geldi çattı! 🛶",
-            "Ailece termal otele geldiniz, ılık suda yüzme vakti! 🏨"
+            "Bugün çok yakın bir arkadaşının doğum günü partisine gidiyorsun! 🎂",
+            "Akrabanızın düğünü var, en güzel kıyafetlerini giyme vakti! 🎊",
+            "Okulda yılsonu gösterisi var, sahneye çıkmak için hazırlanıyorsun! 🎭",
+            "Ailece çok şık bir restorana yemeğe gidiyorsunuz! 🍽️",
+            "Bayram sabahı geldi, bayramlıklarını giymek için sabırsızlanıyorsun! 🎈",
+            "Kuzeninle birlikte çocuk tiyatrosuna gideceksiniz, hazırlanman lazım! 🎟️",
+            "Okuldaki resim sergisi için en şık halinle hazırlanıyorsun! 🎨",
+            "Hafta sonu ailenle birlikte çok güzel bir kutlamaya katılacaksın! ✨",
+            "Piyano resitalin var, sahneye çıkmadan önce kıyafetini giymelisin! 🎹",
+            "Büyükannenin doğum günü yemeği için harika görünmek istiyorsun! 🎁"
         ];
 
         // 2. BÖLÜM: Senaryolar (16 Adet)
@@ -394,7 +386,6 @@
             { text: "Öğretmenler günü için öğretmenimize hediye aldık, sınıfa gelene kadar aramızda.", type: "surpriz" },
             { text: "Abinle babana tuttukları takımın maç biletini aldınız, akşam görecek.", type: "surpriz" },
             { text: "Kardeşine çok istediği o oyuncağı aldım, akşam yemeğinde vereceğim.", type: "surpriz" },
-            { text: "Hafta sonu lunaparka gideceğiz ama annene söyleme, ona sürpriz olsun.", type: "surpriz" },
             { text: "Babalar günü için babana kendi ellerinle kart hazırladın, yastığının altına sakladın.", type: "surpriz" },
             { text: "En yakın arkadaşının doğum günü partisini planlıyorsunuz, o gelene kadar susmalısın.", type: "surpriz" },
             { text: "Annene kendi harçlığınla çok tatlı bir toka aldın, cebinde saklıyorsun.", type: "surpriz" },
@@ -448,7 +439,6 @@
             return [...array].sort(() => 0.5 - Math.random());
         }
 
-        // Kazanmayı garanti altına alan havuz algoritması
         function generateStage4Candidates() {
             const safeCands = allCandidates.filter(c => c.safe);
             const unsafeCands = allCandidates.filter(c => !c.safe);
@@ -543,8 +533,6 @@
         function startGame() {
             if (!gameState.gender) { Swal.fire({ icon: 'warning', title: 'Bir saniye!', text: 'Lütfen önce kız mısın erkek misin, onu seç.', width: window.innerWidth > 1024 ? '600px' : 'auto' }); return; }
 
-            gameState.name = 'Kahraman';
-            document.getElementById('player-name-display').innerText = gameState.name;
             document.getElementById('player-avatar-display').innerText = gameState.avatar;
             document.getElementById('stage1-avatar').innerText = gameState.avatar;
             document.getElementById('top-bar').classList.remove('hidden');
@@ -559,17 +547,17 @@
 
             // Cinsiyet Görseli Ayarla
             if (gameState.gender === 'erkek') {
-                document.getElementById('stage1-title').innerText = "Mayo Kuralı 🩳";
-                document.getElementById('stage1-desc').innerHTML = `Bedeninde sadece sana ait olan "Özel Bölgeler" vardır. <b>Aşağıdaki deniz şortunu tutup karakterinin üzerine sürükle!</b>`;
-                document.getElementById('swimsuit-icon-drag').innerText = "🩳";
-                document.getElementById('swimsuit-icon-overlay').innerText = "🩳";
+                document.getElementById('stage1-title').innerText = "Özel Bölgelerim 👔";
+                document.getElementById('stage1-desc').innerHTML = `Bedeninde sadece sana ait olan "Özel Bölgeler" vardır. <b>Aşağıdaki takım elbiseyi tutup karakterinin üzerine sürükle!</b>`;
+                document.getElementById('swimsuit-icon-drag').innerText = "👔";
+                document.getElementById('swimsuit-icon-overlay').innerText = "👔";
                 document.getElementById('swimsuit-draggable').classList.replace('border-purple-300', 'border-blue-300');
                 document.getElementById('swimsuit-hint').classList.replace('text-purple-600', 'text-blue-600');
             } else {
-                document.getElementById('stage1-title').innerText = "Mayo Kuralı 🩱";
-                document.getElementById('stage1-desc').innerHTML = `Bedeninde sadece sana ait olan "Özel Bölgeler" vardır. <b>Aşağıdaki mayoyu tutup karakterinin üzerine sürükle!</b>`;
-                document.getElementById('swimsuit-icon-drag').innerText = "🩱";
-                document.getElementById('swimsuit-icon-overlay').innerText = "🩱";
+                document.getElementById('stage1-title').innerText = "Özel Bölgelerim 👗";
+                document.getElementById('stage1-desc').innerHTML = `Bedeninde sadece sana ait olan "Özel Bölgeler" vardır. <b>Aşağıdaki elbiseyi tutup karakterinin üzerine sürükle!</b>`;
+                document.getElementById('swimsuit-icon-drag').innerText = "👗";
+                document.getElementById('swimsuit-icon-overlay').innerText = "👗";
                 document.getElementById('swimsuit-draggable').classList.replace('border-blue-300', 'border-purple-300');
                 document.getElementById('swimsuit-hint').classList.replace('text-blue-600', 'text-purple-600');
             }
@@ -592,8 +580,8 @@
                 document.getElementById('swimsuit-overlay').classList.add('opacity-100');
 
                 let ruleText = gameState.gender === 'erkek' 
-                    ? 'Erkeklerin özel bölgeleri bacak araları ve popolarıdır. Buraları deniz şortumuz kapatır. Temizlik veya doktor kontrolü dışında KİMSE İZİNSİZ DOKUNAMAZ VE BAKAMAZ!'
-                    : 'Kızların özel bölgeleri göğüsleri, bacak araları ve popolarıdır. Buraları mayomuz kapatır. Temizlik veya doktor kontrolü dışında KİMSE İZİNSİZ DOKUNAMAZ VE BAKAMAZ!';
+                    ? 'Erkeklerin özel bölgeleri bacak araları ve kalçalarıdır. Kıyafetlerimiz bu bölgeleri korur. Temizlik veya doktor kontrolü dışında KİMSE İZİNSİZ DOKUNAMAZ VE BAKAMAZ!'
+                    : 'Kızların özel bölgeleri göğüsleri, bacak araları ve kalçalarıdır. Kıyafetlerimiz bu bölgeleri korur. Temizlik veya doktor kontrolü dışında KİMSE İZİNSİZ DOKUNAMAZ VE BAKAMAZ!';
                 
                 Swal.fire({ title: 'Harika!', text: ruleText, icon: 'success', confirmButtonText: 'Anladım! 💪', confirmButtonColor: gameState.gender === 'erkek' ? '#3b82f6' : '#ec4899', width: window.innerWidth > 1024 ? '800px' : 'auto' }).then(() => {
                     document.getElementById('btn-next-1').classList.remove('hidden');
@@ -632,7 +620,7 @@
                         });
                     } else {
                         Swal.fire({ title: 'Bir Saniye... 🛑', text: el.dataset.reply, icon: 'warning', confirmButtonText: 'Tekrar Düşün', confirmButtonColor: '#f59e0b' }).then(() => {
-                            revert(); // Yanlışsa kartı geri gönder, ilerleme
+                            revert();
                         });
                     }
                 });
@@ -650,7 +638,6 @@
             }
             const current = gameState.currentSecrets[gameState.stage3Index];
             
-            // Önceki sorulardan kalan "gizli tıklama dinleyicilerini" sıfırlamak için kartı klonlayıp yeniliyoruz (Atlama sorununu çözer)
             let oldCard = document.getElementById('secret-card');
             let card = oldCard.cloneNode(true);
             oldCard.parentNode.replaceChild(card, oldCard);
@@ -721,7 +708,6 @@
         function finishGame() {
             document.getElementById('top-bar').classList.add('hidden');
             document.getElementById('top-bar').classList.remove('flex');
-            document.getElementById('cert-name').innerText = gameState.name;
             document.getElementById('cert-avatar').innerText = gameState.avatar;
             showScreen('screen-certificate');
             fireConfetti();
